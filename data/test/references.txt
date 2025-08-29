@@ -1,0 +1,1 @@
+CFHT photometry for the Ursa Minor dSph: Munoz et al. 2018, HSC magnitudes in the data file are fake, not actual HSC data.
