@@ -2,6 +2,7 @@ import logging
 import numpy as np
 import pandas as pd
 import astropy.units as u
+import matplotlib.pyplot as plt
 from astropy.coordinates import SkyCoord, Distance
 from astropy.time import Time
 
@@ -9,6 +10,7 @@ from ..util.args import *
 from ..util.coords import *
 from ..util import ReadOnlyDict
 from ..photometry import Color, Magnitude
+from ..diagram import MagnitudeDiagram, SpatialDiagram
 from .diagramvalueprovider import DiagramValueProvider
 
 from ..setup_logger import logger
@@ -304,3 +306,9 @@ class Catalog(DiagramValueProvider):
             idx[separation > max_separation] = -1
 
         return idx, separation
+
+    def plot(self, ax: plt.Axes, diagram,**kwargs):
+        if isinstance(diagram, MagnitudeDiagram):
+            return self._plot_magnitude(ax, diagram, **kwargs)
+        elif isinstance(diagram, SpatialDiagram):
+            return self._plot_spatial(ax, diagram, **kwargs)

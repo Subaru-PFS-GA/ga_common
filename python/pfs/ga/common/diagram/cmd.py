@@ -2,10 +2,10 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from ..util import *
-from .diagram import Diagram
+from .magnitudediagram import MagnitudeDiagram
 from . import styles
 
-class CMD(Diagram):
+class CMD(MagnitudeDiagram):
     def __init__(self, axes, orig=None):
         super().__init__(axes, orig=orig)
 

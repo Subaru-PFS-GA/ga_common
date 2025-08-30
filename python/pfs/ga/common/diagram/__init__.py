@@ -3,6 +3,8 @@ from .coloraxis import ColorAxis
 from .magnitudeaxis import MagnitudeAxis
 from .radecaxis import RaDecAxis
 from .diagram import Diagram
+from .magnitudediagram import MagnitudeDiagram
+from .spatialdiagram import SpatialDiagram
 from .cmd import CMD
 from .ccd import CCD
 from .fov import FOV

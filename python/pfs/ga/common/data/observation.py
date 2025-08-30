@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-
 from astropy import units as u
 from astropy.coordinates import SkyCoord, Distance
 
@@ -546,10 +545,10 @@ class Observation(Catalog):
             if any_flux_err is not None:
                 self.__data.loc[m, flux_err_col_canonical] = any_flux_err[m]
                     
-    def plot_cmd(self, ax: plt.Axes, diagram, observed=None, mask=None, s=None, **kwargs):
+    def _plot_magnitude(self, ax: plt.Axes, diagram, observed=None, mask=None, s=None, **kwargs):
         
         observed = observed if observed is not None else self.observed
-        (x, _), (y, _) = self.get_diagram_values(self.axes, observed=observed, mask=mask)
+        (x, _), (y, _) = self.get_diagram_values(diagram.axes, observed=observed, mask=mask)
 
         l = diagram.scatter(ax, x, y, s=s, **kwargs)
 
@@ -557,8 +556,7 @@ class Observation(Catalog):
 
         return l
 
-    def plot_spatial(self, ax: plt.Axes, diagram, 
-            observed=None, mask_fov=False, mask=None, s=None, **kwargs):
+    def _plot_spatial(self, ax: plt.Axes, diagram, observed=None, mask_fov=False, mask=None, s=None, **kwargs):
 
         observed = observed if observed is not None else self.observed
         ra, dec = self.get_coords(mask=mask)
