@@ -312,3 +312,5 @@ class Catalog(DiagramValueProvider):
             return self._plot_magnitude(ax, diagram, **kwargs)
         elif isinstance(diagram, SpatialDiagram):
             return self._plot_spatial(ax, diagram, **kwargs)
+        else:
+            raise NotImplementedError()
