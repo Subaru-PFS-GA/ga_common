@@ -10,10 +10,17 @@ from ..util.args import *
 
 # TODO: move this elsewhere
 class Pointing():
-    def __init__(self, *pos, posang=None,
-                 obs_time=None, exp_time=None,
-                 priority=None, stage=None,
-                 nvisits=None, orig=None):
+    def __init__(self,
+                 *pos,
+                 posang=None,
+                 obs_time=None,
+                 exp_time=None,
+                 priority=None,
+                 stage=None,
+                 nvisits=None,
+                 nrepeats=None,
+                 label=None,
+                 orig=None):
         """
         Create a new `Pointing` instance that describes the telescope's position
         the time of the observation and the number and length of exposures.
@@ -27,6 +34,8 @@ class Pointing():
             self.__priority = priority
             self.__stage = stage
             self.__nvisits = nvisits
+            self.__nrepeats = nrepeats
+            self.__label = label
         else:
             self.__pos = normalize_pos(*pos) if (pos is not None and pos != ()) else orig.__pos
             self.__posang = normalize_angle(posang, u.degree) if posang is not None else orig.__posang
@@ -35,6 +44,8 @@ class Pointing():
             self.__priority = priority if priority is not None else orig.__priority
             self.__stage = stage if stage is not None else orig.__stage
             self.__nvisits = nvisits if nvisits is not None else orig.__nvisits
+            self.__nrepeats = nrepeats if nrepeats is not None else orig.__nrepeats
+            self.__label = label if label is not None else orig.__label
 
     def __repr__(self):
         arglist = f'{self.ra:0.4f}, {self.dec:0.4f}, posang={self.posang:0.4f}'
@@ -46,6 +57,8 @@ class Pointing():
             arglist += f', stage={self.__stage}'
         if self.__priority is not None:
             arglist += f', priority={self.__priority}'
+        if self.__label is not None:
+            arglist += f', label="{self.__label}"'
         return f'Pointing({arglist})'
 
     def __get_pos(self):
@@ -114,6 +127,22 @@ class Pointing():
 
     nvisits = property(__get_nvisits, __set_nvisits)
 
+    def __get_nrepeats(self):
+        return self.__nrepeats
+    
+    def __set_nrepeats(self, value):
+        self.__nrepeats = value
+
+    nrepeats = property(__get_nrepeats, __set_nrepeats)
+
+    def __get_label(self):
+        return self.__label
+
+    def __set_label(self, value):
+        self.__label = value
+
+    label = property(__get_label, __set_label)
+
     @staticmethod
     def __get_full_rotation(sep, pa, ra, dec):
         r1 = rotation_matrix(sep * u.deg, 'z')  # separation of the pointing center from the center of the object
@@ -133,7 +162,7 @@ class Pointing():
     def from_relative_pos(*pos, dir, sep, posang=None,
                           obs_time=None, exp_time=None,
                           priority=None, stage=None,
-                          nvisits=None):
+                          nvisits=None, nrepeats=None):
         """
         Calculate the pointing center relative to the `ra` and `dec` coordinates in the direction
         `dir` at a separation angle of `sep`.
@@ -144,4 +173,4 @@ class Pointing():
         return Pointing(pra, pdec, posang=posang,
                         obs_time=obs_time, exp_time=exp_time,
                         priority=priority, stage=stage,
-                        nvisits=nvisits)
+                        nvisits=nvisits, nrepeats=nrepeats)
