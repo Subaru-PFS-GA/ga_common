@@ -348,11 +348,11 @@ class Config():
     #endregion Load
     #region Save
         
-    def save(self, path):
+    def save(self, path, format=None):
         # Save configuration to a file
 
         config = self._save_impl()
-        Config.__save_dict_to_file(config, path, format='.json')
+        Config.__save_dict_to_file(config, path, format=format)
 
     def _save_impl(self):
         """

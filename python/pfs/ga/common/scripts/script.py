@@ -43,6 +43,8 @@ class Script():
             Log to console.
         """
 
+        self.__args = {}
+
         self.__log_level = log_level                # Default log level
         self.__log_to_file = log_to_file            # Log to file
         self.__log_to_console = log_to_console      # Log to console
@@ -58,6 +60,8 @@ class Script():
         self.__parser = ArgumentParser()
         self.__profiler = None
         self.__timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
+
+        super().__init__()
 
     #region Properties
 
@@ -156,7 +160,10 @@ class Script():
 
         self.__args = self.__parser.parse_args().__dict__
 
-    def add_arg(self, *args, **kwargs):
+    def add_arg(self,
+                *args,
+                ignore_duplicate=False,
+                **kwargs):
         """
         Adds an argument to the argument parser.
 
@@ -168,7 +175,11 @@ class Script():
             Argument options.
         """
 
-        self.__parser.add_argument(*args, **kwargs)
+        # Check if the parser already has the argument defined
+        if ignore_duplicate and args[0] in self.__parser._option_string_actions:
+            pass
+        else:
+            self.__parser.add_argument(*args, **kwargs)
 
     def is_arg(self, name, args=None):
         """
@@ -225,6 +236,9 @@ class Script():
         self.add_arg('--debug', action='store_true', help='Enable debug mode')
         self.add_arg('--profile', action='store_true', help='Enable performance profiler')
         self.add_arg('--log-level', type=str, help='Set log level')
+        self.add_arg('--log-file', type=str, help='Set log file')
+        self.add_arg('--log-to-console', dest='log_to_console', action='store_true', help='Log to console')
+        self.add_arg('--no-log-to-console', dest='log_to_console', action='store_false', help='Do not log to console')
 
     def _init_from_args_pre_logging(self, args):
         """
@@ -247,8 +261,12 @@ class Script():
             else:
                 raise ValueError(f'Invalid log level `{log_level}`.')
             
+        self.__log_file = self.get_arg('log_file', args, self.__log_file)
+        self.__log_to_console = self.get_arg('log_to_console', args, self.__log_to_console)
+
         if self.__debug and self.__log_level > logging.DEBUG:
             self.__log_level = logging.DEBUG
+            self.__log_to_console = True
 
     def _init_from_args(self, args):
         """
@@ -510,15 +528,20 @@ class Script():
 
     def _dump_settings(self):
         """
-        Save environment, arguments and command-line to files next to the log file
+        Save environment, arguments and command-line to files next to the log file.
+        If logging to a file is disabled, save the configuration to the current
+        working directory.
         """
 
         if self.__log_to_file and self.__log_file is not None:
-            logdir = os.path.dirname(self.__log_file)
-            command = self.get_command_name()
-            self.__dump_env(os.path.join(logdir, f'{command}_{self.__timestamp}.env'))
-            self.__dump_args(os.path.join(logdir, f'{command}_{self.__timestamp}.args'), format='.json')
-            self.__dump_cmdline(os.path.join(logdir, f'{command}_{self.__timestamp}.cmd'))
+            dumpdir = os.path.dirname(self.__log_file)
+        else:
+            dumpdir = os.getcwd()
+
+        command = self.get_command_name()
+        self.__dump_env(os.path.join(dumpdir, f'{command}_{self.__timestamp}.env'))
+        self.__dump_args(os.path.join(dumpdir, f'{command}_{self.__timestamp}.args'), format='.json')
+        self.__dump_cmdline(os.path.join(dumpdir, f'{command}_{self.__timestamp}.cmd'))
 
     def execute(self):
         """
@@ -540,12 +563,18 @@ class Script():
         self.prepare()
 
         # Start logging and profiler
-        self.start_logging()    
+        self.start_logging()
         self._init_from_args(self.__args)
         self._dump_settings()
         self.__start_profiler()
 
         logger.info(f'Starting execution of {self.get_command_name()}.')
+
+        # If running inside a batch system (currently only slurm), log the job ID
+        if self.is_env('SLURM_JOB_ID'):
+            job_id = self.get_env('SLURM_JOB_ID')
+            hostname = self.get_env('HOSTNAME', 'unknown')
+            logger.info(f'Running in SLURM job {job_id} on server {hostname}.')
 
         try:
             self.run()
@@ -577,7 +606,10 @@ class Script():
         
         command = self.get_command_name()
         time = self.__timestamp
-        self.__log_file = f'{command}_{time}.log'
+
+        # If the log file is not overridden from the command-line, set it to the default
+        if self.__log_file is None:
+            self.__log_file = f'{command}_{time}.log'
 
     def run(self):
         """
