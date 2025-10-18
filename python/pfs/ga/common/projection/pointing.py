@@ -29,7 +29,7 @@ class Pointing():
         if not isinstance(orig, Pointing):
             self.__pos = normalize_pos(*pos)
             self.__posang = normalize_angle(posang, u.degree) if posang is not None else normalize_angle(0)
-            self.__obs_time = normalize_time(obs_time if obs_time is not None else datetime.utcnow())
+            self.__obs_time = normalize_time(obs_time)
             self.__exp_time = normalize_exp_time(exp_time if exp_time is not None else 900)
             self.__priority = priority
             self.__stage = stage
