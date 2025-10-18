@@ -237,7 +237,7 @@ class Script():
         self.add_arg('--profile', action='store_true', help='Enable performance profiler')
         self.add_arg('--log-level', type=str, help='Set log level')
         self.add_arg('--log-file', type=str, help='Set log file')
-        self.add_arg('--log-to-console', dest='log_to_console', action='store_true', help='Log to console')
+        self.add_arg('--log-to-console', dest='log_to_console', action='store_true', default=True, help='Log to console')
         self.add_arg('--no-log-to-console', dest='log_to_console', action='store_false', help='Do not log to console')
 
     def _init_from_args_pre_logging(self, args):
