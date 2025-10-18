@@ -85,6 +85,6 @@ class FOVTest(TestBase):
         fov = FOV(projection=p)
 
         f, ax = self.get_test_plot(projection=p.wcs)
-        obs.plot_spatial(ax, fov)
+        obs._plot_spatial(ax, fov)
 
         self.save_fig(f)
