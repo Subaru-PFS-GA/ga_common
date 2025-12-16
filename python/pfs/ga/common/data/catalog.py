@@ -307,7 +307,7 @@ class Catalog(DiagramValueProvider):
 
         return idx, separation
 
-    def plot(self, ax: plt.Axes, diagram,**kwargs):
+    def plot(self, ax: plt.Axes, diagram, **kwargs):
         if isinstance(diagram, MagnitudeDiagram):
             return self._plot_magnitude(ax, diagram, **kwargs)
         elif isinstance(diagram, SpatialDiagram):
