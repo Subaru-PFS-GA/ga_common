@@ -6,3 +6,4 @@ from .andselection import AndSelection
 from .orselection import OrSelection
 from .polygonselection import PolygonSelection
 from .maskselection import MaskSelection
+from .coneselection import ConeSelection
