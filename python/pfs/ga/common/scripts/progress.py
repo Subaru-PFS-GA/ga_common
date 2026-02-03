@@ -14,6 +14,7 @@ class Progress():
         self.__dry_run = False              # Dry run mode
         self.__top = None                   # Stop after this many objects
         self.__progress = False             # Display a progress bar
+        self.__yes = False                  # Assume yes to all questions
 
     def __get_dry_run(self):
         return self.__dry_run
@@ -30,15 +31,22 @@ class Progress():
     
     progress = property(__get_progress)
 
+    def __get_yes(self):
+        return self.__yes
+
+    yes = property(__get_yes)
+
     def _add_args(self):           
         self.add_arg('--dry-run', action='store_true', help='Dry run mode')
         self.add_arg('--top', type=int, help='Stop after this many objects')
         self.add_arg('--progress', action='store_true', help='Display a progress bar.')
+        self.add_arg('--yes', action='store_true', help='Assume yes to all questions.')
 
     def _init_from_args(self, args):
         self.__dry_run = self.get_arg('dry_run', args, self.__dry_run)
         self.__top = self.get_arg('top', args, self.__top)
         self.__progress = self.get_arg('progress', args, self.__progress)
+        self.__yes = self.get_arg('yes', args, self.__yes)
 
     def _wrap_in_progressbar(self, iterable, total=None, logger=None):
         # Wrap the iterator in a progress bar if requested
