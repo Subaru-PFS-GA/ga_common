@@ -3,6 +3,7 @@ from unittest import TestCase
 from datetime import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
+import astropy.units as u
 
 import pfs.ga.common
 from pfs.ga.common.io import ObservationSerializer
@@ -83,7 +84,7 @@ class TestBase(TestCase):
         return p
 
     def get_test_plot(self, projection=None):
-        f, ax = plt.subplots(1, 1, figsize=(3.5, 3.5), dpi=250, subplot_kw=dict(projection=projection))
+        f, ax = plt.subplots(1, 1, figsize=(5, 5), dpi=240, subplot_kw=dict(projection=projection))
         return f, ax
 
     def get_test_diagram(self):

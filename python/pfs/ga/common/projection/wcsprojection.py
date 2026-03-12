@@ -36,11 +36,20 @@ class WcsProjection(Projection):
 
     def __get_wcs(self):
         w = wcs.WCS(naxis=2)
-        w.wcs.ctype = ["RA---{}".format(self.__proj), "DEC--{}".format(self.__proj)]
+        w.wcs.ctype = [f"RA---{self.__proj}", f"DEC--{self.__proj}"]
+
+        fov = self.__scale * 1                      # deg
+        npix = 1.0                                  # Arbitrary number
+        scale = (fov / npix)                        # Pixel scale (deg/pixel)
+
         w.wcs.crpix = [0, 0]
         w.wcs.crval = [self.pointing.ra, self.pointing.dec]
-        w.wcs.cdelt = [self.__scale, self.__scale]
-        w.wcs.set_pv([(2, 1, 0.0)])     # TODO: set position angle
+
+        # Negative sign on CD1_1 gives north-up, east-left (standard FITS)
+        w.wcs.cd = [[-scale, 0],
+                   [0,      scale]]
+
+        # TODO: set position angle
 
         return w
 
