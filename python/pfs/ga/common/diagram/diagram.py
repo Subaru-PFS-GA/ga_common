@@ -84,17 +84,18 @@ class Diagram():
         if fmt is not None:
             args += (fmt,)
         
-        lines = ax.plot(*args, **styles.sanitize_style(**style))
+        [line] = ax.plot(*args, **styles.sanitize_style(**style))
         
         # TODO: something is wrong here because the FOV plots are scaled incorrectly
         #       if lines are plotted
-        for l in lines:
-            x, y = l.get_data()
-            self.__update_datalim(x, y, scalex, scaley)
+        if scalex or scaley:
+            pts = ax.transData.inverted().transform(np.vstack(line.get_data()))
+            x0, y0, x1, y1 = pts[..., 0].min(), pts[..., 1].min(), pts[..., 0].max(), pts[..., 1].max()
+            self.__update_datalim([x0, x1], [y0, y1], scalex, scaley)
 
         self.apply(ax)
 
-        return lines
+        return line
     
     def fill(self, ax: plt.Axes, x, y, mask=None, s=None, scalex=True, scaley=True, **kwargs):
         
@@ -105,7 +106,14 @@ class Diagram():
 
         args = (x[mask][s], y[mask][s])
 
-        lines = ax.fill(*args, **styles.sanitize_style(**style))
+        [lines] = ax.fill(*args, **styles.sanitize_style(**style))
+
+        if scalex or scaley:
+            pts = ax.transData.inverted().transform(lines.get_path().vertices)
+            x0, y0, x1, y1 = pts[..., 0].min(), pts[..., 1].min(), pts[..., 0].max(), pts[..., 1].max()
+            self.__update_datalim([x0, x1], [y0, y1], scalex, scaley)
+
+        self.apply(ax)
 
         return lines
 

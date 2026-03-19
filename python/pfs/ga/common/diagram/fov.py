@@ -57,7 +57,7 @@ class FOV(SpatialDiagram):
         e  = ellipticity                   # ellipticity
 
         a = (A / 2).to(u.deg)            # semi-major axis
-        b = a * e                        # semi-minor axis
+        b = a * (1 - e)                  # semi-minor axis
 
         # Rotated tangent-plane frame
         center = SkyCoord(ra * u.deg, dec * u.deg, frame='icrs')
