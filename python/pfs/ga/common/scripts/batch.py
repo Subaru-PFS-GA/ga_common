@@ -34,11 +34,12 @@ class Batch():
         self.__memory = self.get_arg('memory', args, self.__memory)
         self.__time = self.get_arg('time', args, self.__time)
     
-    def _submit_job(self, command, item, output_dir=None, output_file=None):
+    def _submit_job(self, command, item, job_name, output_dir=None, output_file=None):
         output_dir = output_dir if output_dir is not None else os.getcwd()
         output_file = output_file if output_file is not None else r'slurm-%j.out'
 
         sbatch_script = f"""#!/bin/env bash
+#SBATCH --job-name {job_name}
 #SBATCH --partition {self.__partition}
 #SBATCH --cpus-per-task {self.__cpus}
 #SBATCH --mem {self.__memory}
@@ -52,7 +53,7 @@ srun {command}
 
         # Submit the job to slurm
         if self.dry_run:
-            logger.info(f'Dry run: sbatch script for {item}.')
+            logger.info(f'Dry run: sbatch script for {item} with name {job_name}.')
         else:
             # Execute the sbatch command and pass in sbatch_script via stdin
             process = subprocess.Popen(
