@@ -1,4 +1,5 @@
 import os
+import time
 import subprocess
 
 from ..setup_logger import logger
@@ -55,16 +56,32 @@ srun {command}
         if self.dry_run:
             logger.info(f'Dry run: sbatch script for {item} with name {job_name}.')
         else:
-            # Execute the sbatch command and pass in sbatch_script via stdin
-            process = subprocess.Popen(
-                ['sbatch'],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
-            stdout, stderr = process.communicate(sbatch_script)
-            if process.returncode != 0:
-                raise RuntimeError(f'sbatch submission failed: {stderr.strip()}')
+            retries = 5
 
-            logger.info(f'Submitted sbatch script for {item}.')
+            while retries > 0:
+                try:
+                    # Execute the sbatch command and pass in sbatch_script via stdin
+                    process = subprocess.Popen(
+                        ['sbatch'],
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True
+                    )
+                    stdout, stderr = process.communicate(sbatch_script)
+                    if process.returncode != 0:
+                        raise RuntimeError(f'sbatch submission failed: {stderr.strip()}')
+
+                    logger.info(f'Submitted sbatch script for {item}.')
+                    break
+                except Exception as e:
+                    logger.error(f'Error submitting sbatch script for {item}: {e}')
+                    retries -= 1
+                    if retries > 0:
+                        logger.info(f'Retrying... ({5 - retries}/5)')
+                    else:
+                        logger.error(f'Failed to submit sbatch script for {item} after 5 attempts.')
+                        raise e
+
+                # Wait a bit before retrying
+                time.sleep(1)
