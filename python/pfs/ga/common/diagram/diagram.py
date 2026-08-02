@@ -78,13 +78,13 @@ class Diagram():
         s = s if s is not None else np.s_[:]
         mask = mask if mask is not None else np.s_[:]
 
-        style = styles.tiny_dots_plot(**kwargs)        
+        #style = styles.tiny_dots_plot(**kwargs)        
 
         args = (x[mask][s], y[mask][s])
         if fmt is not None:
             args += (fmt,)
         
-        [line] = ax.plot(*args, **styles.sanitize_style(**style))
+        [line] = ax.plot(*args, **styles.sanitize_style(**kwargs))
         
         # TODO: something is wrong here because the FOV plots are scaled incorrectly
         #       if lines are plotted
@@ -102,7 +102,7 @@ class Diagram():
         s = s if s is not None else np.s_[:]
         mask = mask if mask is not None else np.s_[:]
 
-        style = styles.red_fill(**kwargs)
+        style = styles.sanitize_style(**kwargs)
 
         args = (x[mask][s], y[mask][s])
 
