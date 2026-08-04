@@ -7,8 +7,14 @@ def __update_style(args, key, value):
     if isinstance(key, str) or not isinstance(key, Iterable):
         key = [ key ]
 
-    if not any([ k in args for k in key]):
-        args[key[0]] = value
+    # Find the first key that exists in args and update it
+    for k in key:
+        if k in args:
+            args[k] = value
+            return
+    
+    # If none exist, add the first key
+    args[key[0]] = value
 
 def dashed_line(**kwargs):
     args = kwargs.copy()
@@ -74,10 +80,15 @@ def histogram_imshow(**kwargs):
 
     return args
 
-def red_fill(**kwargs):
+def color_fill(fillcolor='r', fillalpha=0.5, **kwargs):
     args = kwargs.copy()
 
-    __update_style(args, ('color', 'c', 'fmt'), 'r')
+    __update_style(args, ('color', 'c', 'fmt'), fillcolor)
     __update_style(args, 'edgecolor', 'None')
+    __update_style(args, 'alpha', fillalpha)
 
+    return args
+
+def red_fill(**kwargs):
+    args = color_fill(fillcolor='r', fillalpha=1.0, **kwargs)
     return args
