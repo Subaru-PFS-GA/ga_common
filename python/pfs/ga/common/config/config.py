@@ -176,8 +176,9 @@ class Config():
         # member variables of the configuration class
         for key, value in config.items():
             if not hasattr(self, key):
-                raise ValueError(f'Member `{key}` of class `{type(self).__name__}` does not exist.')
+                raise ValueError(f'Configuration Error: member `{key}` of class `{type(self).__name__}` does not exist.')
             
+            # If the value is explicitly set to None, set the member to None and continue.
             if value is None:
                 setattr(self, key, None)
                 continue
