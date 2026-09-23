@@ -49,7 +49,7 @@ class Batch():
 
 set -e
 
-srun {command}
+{command}
 """
 
         # Submit the job to slurm
