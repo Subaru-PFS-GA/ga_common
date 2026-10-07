@@ -494,9 +494,11 @@ class Observation(Catalog):
                     logger.warning(f'No flux or magnitude of type `{prefix}` available for filter `{filter}` in target list `{self.name}`.')
             else:
                 # The flux column is available, use it directly                
-                flux = self.__data[flux_col]
+                # Work on copies because the mask is applied below and must not
+                # modify the original columns, which are shared between filters
+                flux = self.__data[flux_col].copy()
                 if flux_err_col is not None:
-                    flux_err = self.__data[flux_err_col]
+                    flux_err = self.__data[flux_err_col].copy()
 
             # Apply the mask
             if mask is not None:
@@ -519,9 +521,11 @@ class Observation(Catalog):
             # Register the new columns in the photometry description
             if magnitude.columns is None:
                 magnitude.columns = {}
-            if flux_key not in magnitude.columns:
+            # If the filter is selected by a mask, the original column holds the fluxes of
+            # several filters, so point to the canonical column which only has this filter
+            if flux_key not in magnitude.columns or mask is not None:
                 magnitude.columns[flux_key] = flux_col_canonical
-            if flux_err_key not in magnitude.columns:
+            if flux_err_key not in magnitude.columns or mask is not None:
                 magnitude.columns[flux_err_key] = flux_err_col_canonical
 
             if any_flux is None:
