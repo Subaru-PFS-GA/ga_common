@@ -7,13 +7,12 @@ def __update_style(args, key, value):
     if isinstance(key, str) or not isinstance(key, Iterable):
         key = [ key ]
 
-    # Find the first key that exists in args and update it
+    # If the caller already specified any of the aliases, keep their value
     for k in key:
         if k in args:
-            args[k] = value
             return
-    
-    # If none exist, add the first key
+
+    # Otherwise set the default under the first key
     args[key[0]] = value
 
 def dashed_line(**kwargs):
