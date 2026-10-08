@@ -1,3 +1,5 @@
+import os
+import logging
 from astroquery.gaia import Gaia
 from astropy.coordinates import SkyCoord
 import astropy.units as u
@@ -5,6 +7,27 @@ import astropy.units as u
 from ..util.args import *
 from ..data import Observation
 from .catalogserializer import CatalogSerializer
+
+logger = logging.getLogger(__name__)
+
+def _gaia_login():
+    """
+    Log in to the Gaia archive if a credentials file exists (username on the first
+    line, password on the second). The path is taken from `GAIA_CREDENTIALS` or
+    defaults to `~/.gaia_credentials`. Continues anonymously if not available.
+    """
+
+    path = os.path.expanduser(os.environ.get('GAIA_CREDENTIALS', '~/.gaia_credentials'))
+    if not os.path.isfile(path):
+        return
+
+    try:
+        if not getattr(Gaia, '_PfsLoggedIn', False):
+            Gaia.login(credentials_file=path)
+            Gaia._PfsLoggedIn = True
+            logger.info('Logged in to the Gaia archive.')
+    except Exception as ex:
+        logger.warning(f'Could not log in to the Gaia archive, continuing anonymously: {ex}')
 
 class GaiaReader(CatalogSerializer):
     def __init__(self,
@@ -86,6 +109,7 @@ class GaiaReader(CatalogSerializer):
             WHERE CONTAINS(POINT('ICRS', gaiadr3.gaia_source.ra, gaiadr3.gaia_source.dec),
                            CIRCLE('ICRS', {pos.ra.degree:0.8f}, {pos.dec.degree:0.8f}, {rad.degree:0.8f})) = 1;"""
         print(query)
+        _gaia_login()
         job = Gaia.launch_job_async(query, dump_to_file=False)
         gaia = job.get_results()
         df = gaia.to_pandas()
@@ -160,6 +184,7 @@ class GaiaReader(CatalogSerializer):
                   AND astrometric_excess_noise_sig < 2.0
                   AND phot_g_mean_mag BETWEEN {mag_min} AND {mag_max};"""
         print(query)
+        _gaia_login()
         job = Gaia.launch_job_async(query, dump_to_file=False)
         gaia = job.get_results()
         df = gaia.to_pandas()
