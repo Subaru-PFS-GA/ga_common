@@ -7,12 +7,13 @@ def __update_style(args, key, value):
     if isinstance(key, str) or not isinstance(key, Iterable):
         key = [ key ]
 
-    # If the caller already specified any of the aliases, keep their value
+    # Find the first key that exists in args and update it
     for k in key:
         if k in args:
+            args[k] = value
             return
-
-    # Otherwise set the default under the first key
+    
+    # If none exist, add the first key
     args[key[0]] = value
 
 def dashed_line(**kwargs):
@@ -66,8 +67,13 @@ def tiny_dots_scatter(**kwargs):
 
     __update_style(args, 'edgecolors', 'None')
     __update_style(args, 'marker', 's')
-    __update_style(args, ('color', 'c'), 'k')
-    __update_style(args, ('size', 's'), 0.1)
+
+    # Only fall back to the defaults if the caller did not specify color or size,
+    # so that color mapping via `c` and `cmap` keeps working.
+    if not any(k in args for k in ('color', 'c')):
+        args['color'] = 'k'
+    if not any(k in args for k in ('size', 's')):
+        args['s'] = 0.1
 
     return args
 

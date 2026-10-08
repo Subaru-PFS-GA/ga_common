@@ -84,6 +84,12 @@ class Diagram():
         if fmt is not None:
             args += (fmt,)
         
+        # An explicit ls=None means 'no line' here, whereas matplotlib would draw the default
+        # solid line and sanitize_style would drop it
+        for k in ('ls', 'linestyle'):
+            if k in kwargs and kwargs[k] is None:
+                kwargs[k] = 'None'
+
         [line] = ax.plot(*args, **styles.sanitize_style(**kwargs))
         
         # TODO: something is wrong here because the FOV plots are scaled incorrectly
