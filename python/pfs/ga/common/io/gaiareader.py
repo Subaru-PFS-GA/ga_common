@@ -1,6 +1,6 @@
 import os
 import logging
-from astroquery.gaia import Gaia
+from astroquery.utils.tap.conn.tapconn import TapConn
 from astropy.coordinates import SkyCoord
 import astropy.units as u
 
@@ -9,6 +9,26 @@ from ..data import Observation
 from .catalogserializer import CatalogSerializer
 
 logger = logging.getLogger(__name__)
+
+MIRROR = False
+
+if MIRROR:
+    from astroquery.gaia import GaiaClass
+    _gaia_tap_handler = TapConn(
+        ishttps=True,
+        host='gaia.aip.de',
+        server_context='/tap',
+        tap_context='',
+        upload_context='Upload',
+        table_edit_context='TableTool',
+        data_context='data',
+        datalink_context='datalink',
+    )
+    _gaia_tap_handler._TapConn__postHeaders['Accept'] = '*/*'
+    Gaia = GaiaClass(tap_plus_conn_handler=_gaia_tap_handler)
+else:
+    from astroquery.gaia import Gaia
+
 
 def _gaia_login():
     """
@@ -110,7 +130,7 @@ class GaiaReader(CatalogSerializer):
                            CIRCLE('ICRS', {pos.ra.degree:0.8f}, {pos.dec.degree:0.8f}, {rad.degree:0.8f})) = 1;"""
         print(query)
         _gaia_login()
-        job = Gaia.launch_job_async(query, dump_to_file=False)
+        job = Gaia.launch_job_async(query, dump_to_file=False, output_format='votable')
         gaia = job.get_results()
         df = gaia.to_pandas()
         df.rename(inplace=True,
@@ -185,7 +205,7 @@ class GaiaReader(CatalogSerializer):
                   AND phot_g_mean_mag BETWEEN {mag_min} AND {mag_max};"""
         print(query)
         _gaia_login()
-        job = Gaia.launch_job_async(query, dump_to_file=False)
+        job = Gaia.launch_job_async(query, dump_to_file=False, output_format='votable')
         gaia = job.get_results()
         df = gaia.to_pandas()
         df.rename(inplace=True,
